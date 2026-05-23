@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShahBaaz Pro — Abbottabad's #1 Super App</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#02040A;color:#ECF0FF;font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#05080F}::-webkit-scrollbar-thumb{background:#5B3FFF;border-radius:2px}
+input,select,button,textarea{font-family:'Plus Jakarta Sans',sans-serif}
+
+/* ANIMATIONS */
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes floatRight{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(0.97)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 15px currentColor}50%{box-shadow:0 0 40px currentColor,0 0 80px currentColor}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes zoomIn{from{opacity:0;transform:scale(0.88) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes splashLogo{0%{opacity:0;transform:scale(0.3) rotate(-15deg)}60%{opacity:1;transform:scale(1.08) rotate(3deg)}100%{transform:scale(1) rotate(0deg)}}
+@keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pinBounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-12px)}70%{transform:translateY(-5px)}}
+@keyframes ripple{0%{transform:scale(0);opacity:1}100%{transform:scale(4);opacity:0}}
+@keyframes codeGlow{0%,100%{text-shadow:0 0 10px #5B3FFF}50%{text-shadow:0 0 30px #5B3FFF,0 0 60px #5B3FFF88}}
+@keyframes gradientFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes starPop{0%{transform:scale(0) rotate(-30deg)}70%{transform:scale(1.3) rotate(5deg)}100%{transform:scale(1) rotate(0deg)}}
+@keyframes notifSlide{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes notifHide{from{transform:translateX(0);opacity:1}to{transform:translateX(120%);opacity:0}}
+@keyframes borderFlow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes iconFloat{0%,100%{transform:translateY(0) rotate(0deg)}33%{transform:translateY(-8px) rotate(-3deg)}66%{transform:translateY(-4px) rotate(3deg)}}
+@keyframes cardSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,9vw,110px);line-height:0.95;letter-spacing:2px;background:linear-gradient(135deg,#fff 0%,#A78BFA 40%,#38BDF8 70%,#34D399 100%);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradientFlow 4s ease infinite}
+.shimmer-bg{background:linear-gradient(90deg,transparent,#ffffff08,transparent);background-size:600px;animation:shimmer 2s linear infinite}
+.float-1{animation:floatUp 3s ease-in-out infinite}
+.float-2{animation:floatUp 3.5s ease-in-out 0.5s infinite}
+.float-3{animation:floatRight 4s ease-in-out infinite}
+.float-4{animation:iconFloat 4s ease-in-out 0.8s infinite}
+.glow-purple{animation:pulseGlow 2.5s ease-in-out infinite;color:#A78BFA}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+
+/* ═══════════════════════════════════════════
+   STORAGE
+═══════════════════════════════════════════ */
+const DB={
+  get:k=>{try{return JSON.parse(localStorage.getItem('sb_'+k))}catch{return null}},
+  set:(k,v)=>{try{localStorage.setItem('sb_'+k,JSON.stringify(v))}catch{}},
+};
+
+function genCode(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const seg=()=>Array.from({length:3},()=>c[Math.floor(Math.random()*c.length)]).join('');
+  return `SB-${seg()}-${seg()}`;
+}
+
+/* ═══════════════════════════════════════════
+   SEED DATA
+═══════════════════════════════════════════ */
+const SEED={
+  users:[
+    {id:'u1',name:'Ashhad',email:'ashhad@shahbaaz.pk',password:'admin123',phone:'03108762949',role:'admin',avatar:'👑',bio:'Founder of ShahBaaz',joined:'2024-01-01',verified:true},
+    {id:'u2',name:'Ali Hassan',email:'ali@test.pk',password:'pass123',phone:'03001234567',role:'user',avatar:'🧑',joined:'2024-03-10',verified:true},
+    {id:'u3',name:'Sara Khan',email:'sara@test.pk',password:'pass123',phone:'03331234567',role:'vendor',avatar:'👩',joined:'2024-04-01',verified:true},
+  ],
+  services:[
+    // RIDES
+    {id:'r1',cat:'rides',name:'Abbottabad–Islamabad Express',city:'Abbottabad',address:'Fawara Chowk, Abbottabad',desc:'AC coaster and Hiace vans running daily to Islamabad. Door pickup available.',icon:'🚐',price:'PKR 350',rating:4.9,avail:true,lat:34.1480,lng:73.1994,owner:'u3',verified:true,tag:'Shared Ride',phone:'03001111111'},
+    {id:'r2',cat:'rides',name:'City Taxi Abbottabad',city:'Abbottabad',address:'Mansehra Rd, Abbottabad',desc:'Local city taxi service. AC cars, professional drivers, 24/7 available.',icon:'🚕',price:'PKR 150/trip',rating:4.7,avail:true,lat:34.1501,lng:73.2010,owner:'u2',verified:true,tag:'Local Taxi',phone:'03002222222'},
+    {id:'r3',cat:'rides',name:'Nathia Gali Jeep Service',city:'Abbottabad',address:'Opposite Burns Hall, Abbottabad',desc:'4x4 jeep service to Nathia Gali, Ayubia, and surrounding hill stations.',icon:'🚙',price:'PKR 800/jeep',rating:4.8,avail:true,lat:34.1465,lng:73.2033,owner:'u1',verified:true,tag:'Adventure',phone:'03003333333'},
+    // FOOD
+    {id:'f1',cat:'food',name:'Shinwari Restaurant Abbottabad',city:'Abbottabad',address:'Jinnah Rd, Near Flashman Hotel',desc:'Authentic Peshawari karahi, chapli kebab and tikka. Famous since 1985.',icon:'🍖',price:'PKR 600 avg',rating:4.9,avail:true,lat:34.1492,lng:73.2018,owner:'u3',verified:true,tag:'Dine-in & Delivery',phone:'03004444444'},
+    {id:'f2',cat:'food',name:'Pizza Club Abbottabad',city:'Abbottabad',address:'Mansehra Rd, Abbottabad',desc:'Freshly baked pizzas, burgers, and fast food. Free delivery in city.',icon:'🍕',price:'PKR 400 avg',rating:4.6,avail:true,lat:34.1508,lng:73.2041,owner:'u2',verified:false,tag:'Fast Food',phone:'03005555555'},
+    {id:'f3',cat:'food',name:'Desi Dhaaba Mansehra',city:'Mansehra',address:'Main Bazaar, Mansehra',desc:'Home-style desi food. Daal, sabzi, roti and fresh lassi.',icon:'🍛',price:'PKR 250 avg',rating:4.8,avail:true,lat:34.3302,lng:73.1976,owner:'u1',verified:true,tag:'Desi Food',phone:'03006666666'},
+    // HOUSES
+    {id:'h1',cat:'houses',name:'Highland Vista Residence',city:'Abbottabad',address:'7 Burn Hall Rd, Abbottabad',desc:'Luxury 5-bed house with mountain views, modern kitchen, landscaped garden and garage.',icon:'🏡',price:'PKR 4.2 Cr',rating:4.8,avail:true,lat:34.153,lng:73.208,owner:'u1',verified:true,tag:'For Sale',beds:5,baths:4,area:'3,200 sqft',phone:'03108762949'},
+    {id:'h2',cat:'houses',name:'Murree Pine Cottage',city:'Murree',address:'14 GPO Chowk, Murree',desc:'Cozy pine cottage surrounded by trees. Perfect holiday home for families.',icon:'🏘️',price:'PKR 85,000/mo',rating:4.6,avail:true,lat:33.909,lng:73.396,owner:'u2',verified:true,tag:'For Rent',beds:3,baths:2,area:'1,800 sqft',phone:'03001234567'},
+    {id:'h3',cat:'houses',name:'Islamabad F-7 Apartment',city:'Islamabad',address:'32-A Jinnah Ave, F-7/1',desc:'Premium 4-bed apartment with gym, rooftop access and 24/7 security.',icon:'🏢',price:'PKR 2.8 Cr',rating:4.9,avail:true,lat:33.711,lng:73.062,owner:'u1',verified:true,tag:'For Sale',beds:4,baths:3,area:'2,500 sqft',phone:'03108762949'},
+    {id:'h4',cat:'houses',name:'Haripur Model Town Villa',city:'Haripur',address:'Model Town, Haripur',desc:'Spacious family villa in quiet area. Near motorway, schools, and hospital.',icon:'🏠',price:'PKR 1.8 Cr',rating:4.5,avail:true,lat:34.001,lng:72.940,owner:'u3',verified:false,tag:'For Sale',beds:4,baths:3,area:'2,800 sqft',phone:'03331234567'},
+    // DOCTORS
+    {id:'d1',cat:'doctors',name:'Dr. Sara Malik — Cardiologist',city:'Abbottabad',address:'Ayub Teaching Hospital, Abbottabad',desc:'Senior cardiologist with 18 years. MBBS, FCPS. Treats heart disease, hypertension.',icon:'❤️',price:'PKR 2,000',rating:4.9,avail:true,lat:34.154,lng:73.212,owner:'u1',verified:true,tag:'Cardiologist',phone:'03007777777'},
+    {id:'d2',cat:'doctors',name:'Dr. Usman Qureshi — Orthopedic',city:'Abbottabad',address:'CMH Abbottabad',desc:'Orthopedic surgeon specializing in joint replacement and sports injuries. 14 yrs exp.',icon:'🦴',price:'PKR 2,500',rating:4.8,avail:true,lat:34.147,lng:73.205,owner:'u2',verified:true,tag:'Orthopedic',phone:'03008888888'},
+    {id:'d3',cat:'doctors',name:'Dr. Amna Bashir — Pediatrician',city:'Mansehra',address:'DHQ Hospital, Mansehra',desc:'Child specialist with 10 years experience. Friendly with kids. Vaccinations available.',icon:'👶',price:'PKR 1,500',rating:4.7,avail:false,lat:34.332,lng:73.199,owner:'u3',verified:true,tag:'Pediatrician',phone:'03009999999'},
+    {id:'d4',cat:'doctors',name:'Dr. Tariq Hussain — Neurologist',city:'Islamabad',address:'PIMS Hospital, G-8/3',desc:'Top neurologist. Expert in epilepsy, migraine and stroke management. 22 yrs.',icon:'🧠',price:'PKR 3,500',rating:5.0,avail:true,lat:33.693,lng:73.048,owner:'u1',verified:true,tag:'Neurologist',phone:'03100000000'},
+    // TECHNICIANS
+    {id:'t1',cat:'technicians',name:'Khalid Electrical Works',city:'Abbottabad',address:'Mandian Bazaar, Abbottabad',desc:'Licensed electrician for wiring, repairs, inverters and solar installations.',icon:'⚡',price:'PKR 2,000/visit',rating:4.9,avail:true,lat:34.149,lng:73.201,owner:'u3',verified:true,tag:'Electrician',phone:'03101111111'},
+    {id:'t2',cat:'technicians',name:'Ali Plumbing & Sanitation',city:'Abbottabad',address:'Jinnah Rd, Abbottabad',desc:'Expert plumber for leaks, drainage, bathroom fittings and water tanks.',icon:'🔧',price:'PKR 1,500/visit',rating:4.7,avail:true,lat:34.144,lng:73.196,owner:'u2',verified:true,tag:'Plumber',phone:'03102222222'},
+    {id:'t3',cat:'technicians',name:'CoolBreeze AC Services',city:'Haripur',address:'Main Bazar, Haripur',desc:'AC installation, gas refilling, deep cleaning and repair. Same day service.',icon:'❄️',price:'PKR 2,500/visit',rating:4.8,avail:false,lat:33.998,lng:72.936,owner:'u1',verified:false,tag:'AC Technician',phone:'03103333333'},
+    {id:'t4',cat:'technicians',name:'Ahmed Carpentry & Wood',city:'Islamabad',address:'G-10 Markaz, Islamabad',desc:'Custom furniture, door fitting, kitchen cabinets and wooden work experts.',icon:'🔨',price:'PKR 3,000/visit',rating:4.8,avail:true,lat:33.672,lng:73.021,owner:'u3',verified:true,tag:'Carpenter',phone:'03104444444'},
+    // TUTORS
+    {id:'tu1',cat:'tutors',name:'Prof. Bilal Ahmed',city:'Abbottabad',address:'Online & Home Visit',desc:'FSc and A-level Math & Physics. 15 years exp. Result-oriented teaching.',icon:'📐',price:'PKR 800/hr',rating:4.9,avail:true,lat:34.151,lng:73.194,owner:'u1',verified:true,tag:'Math & Physics',phone:'03105555555'},
+    {id:'tu2',cat:'tutors',name:'Ms. Hina Shahid',city:'Abbottabad',address:'Nawan Shehr, Abbottabad',desc:'English language, literature and IELTS preparation specialist. 8 yrs exp.',icon:'📚',price:'PKR 600/hr',rating:4.8,avail:true,lat:34.146,lng:73.202,owner:'u2',verified:true,tag:'English & IELTS',phone:'03106666666'},
+    {id:'tu3',cat:'tutors',name:'Rana Coding Academy',city:'Islamabad',address:'Blue Area, Islamabad',desc:'Web dev, Python, React and data science. Bootcamp-style intensive sessions.',icon:'💻',price:'PKR 1,200/hr',rating:4.7,avail:true,lat:33.714,lng:73.053,owner:'u3',verified:false,tag:'Computer Science',phone:'03107777777'},
+    // SHOPS
+    {id:'sh1',cat:'shops',name:'Al-Raza Electronics',city:'Abbottabad',address:'Abbottabad City Centre',desc:'Latest smartphones, laptops, smart TVs and accessories at best prices.',icon:'📺',price:'Starts PKR 5,000',rating:4.7,avail:true,lat:34.148,lng:73.199,owner:'u1',verified:true,tag:'Electronics',phone:'03108888888'},
+    {id:'sh2',cat:'shops',name:'Green Valley Furniture',city:'Abbottabad',address:'Havelian Rd, Abbottabad',desc:'Premium wooden and modern furniture for home and office. Custom orders welcome.',icon:'🛋️',price:'Starts PKR 15,000',rating:4.8,avail:true,lat:34.141,lng:73.191,owner:'u2',verified:true,tag:'Furniture',phone:'03109999999'},
+    {id:'sh3',cat:'shops',name:'Murree Sports & Outdoor',city:'Murree',address:'Kashmir Point, Murree',desc:'Hiking gear, ski equipment, tents and outdoor adventure accessories.',icon:'⛷️',price:'Starts PKR 2,000',rating:4.6,avail:true,lat:33.906,lng:73.390,owner:'u3',verified:false,tag:'Sports',phone:'03110000000'},
+  ],
+  bookings:[],
+  reviews:[
+    {id:'rv1',user:'Ahmed Raza',avatar:'👨',text:'ShahBaaz found me a great plumber in 5 minutes! Amazing service.',rating:5,service:'Ali Plumbing & Sanitation',date:'2024-04-10'},
+    {id:'rv2',user:'Fatima Bibi',avatar:'👩',text:'Booked Dr. Sara through ShahBaaz. The verification code system is genius — very safe!',rating:5,service:'Dr. Sara Malik',date:'2024-04-12'},
+    {id:'rv3',user:'Tariq Mehmood',avatar:'🧔',text:'Best app for Abbottabad locals. Found a tutor for my child same day.',rating:5,service:'Prof. Bilal Ahmed',date:'2024-04-15'},
+    {id:'rv4',user:'Nadia Shah',avatar:'👱‍♀️',text:'The food delivery section is a game changer. Ordered from Shinwari, arrived hot!',rating:5,service:'Shinwari Restaurant',date:'2024-04-18'},
+  ],
+};
+
+function initDB(){
+  if(!DB.get('users'))DB.set('users',SEED.users);
+  if(!DB.get('services'))DB.set('services',SEED.services);
+  if(!DB.get('bookings'))DB.set('bookings',SEED.bookings);
+  if(!DB.get('reviews'))DB.set('reviews',SEED.reviews);
+}
+
+/* ═══════════════════════════════════════════
+   CATEGORIES CONFIG
+═══════════════════════════════════════════ */
+const CATS=[
+  {id:'rides',label:'Rides',icon:'🚗',color:'#F59E0B',desc:'Book a ride anywhere'},
+  {id:'food',label:'Food',icon:'🍽️',color:'#EF4444',desc:'Order food online'},
+  {id:'houses',label:'Houses',icon:'🏠',color:'#8B5CF6',desc:'Buy or rent property'},
+  {id:'doctors',label:'Doctors',icon:'🩺',color:'#06B6D4',desc:'Book a doctor'},
+  {id:'technicians',label:'Technicians',icon:'🔧',color:'#10B981',desc:'Hire an expert'},
+  {id:'tutors',label:'Tutors',icon:'📚',color:'#F97316',desc:'Find a tutor'},
+  {id:'shops',label:'Shops',icon:'🛍️',color:'#EC4899',desc:'Discover local shops'},
+];
+const CMAP=Object.fromEntries(CATS.map(c=>[c.id,c.color]));
+
+const COVERED=['Abbottabad','Islamabad','Rawalpindi','Peshawar','Mansehra','Haripur','Murree'];
+
+/* ═══════════════════════════════════════════
+   NOTIFICATION TOAST
+═══════════════════════════════════════════ */
+let toastFn=null;
+function Toast(){
+  const[toasts,setToasts]=useState([]);
+  toastFn=(msg,type='success')=>{
+    const id=Date.now();
+    setToasts(p=>[...p,{id,msg,type}]);
+    setTimeout(()=>setToasts(p=>p.filter(t=>t.id!==id)),3500);
+  };
+  const colors={success:'#10B981',error:'#EF4444',info:'#6C3BFF',warning:'#F59E0B'};
+  return(
+    <div style={{position:'fixed',top:80,right:16,zIndex:9999,display:'flex',flexDirection:'column',gap:8}}>
+      {toasts.map(t=>(
+        <div key={t.id} style={{background:'#0D1428',border:`1px solid ${colors[t.type]}55`,borderRadius:12,padding:'12px 16px',
+          maxWidth:280,boxShadow:`0 4px 24px ${colors[t.type]}33`,
+          animation:'notifSlide 0.3s ease',display:'flex',alignItems:'center',gap:10}}>
+          <span style={{width:8,height:8,borderRadius:'50%',background:colors[t.type],flexShrink:0,boxShadow:`0 0 8px ${colors[t.type]}`}}/>
+          <span style={{color:'#ECF0FF',fontSize:13}}>{t.msg}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+function toast(m,t){if(toastFn)toastFn(m,t);}
+
+/* ═══════════════════════════════════════════
+   PAKISTAN MAP
+═══════════════════════════════════════════ */
+function MapView({services,activeCat,onPinClick,selectedId}){
+  const W=520,H=580;
+  const latMin=23.5,latMax=37.8,lngMin=60,lngMax=77.8;
+  function proj(lat,lng){
+    return[((lng-lngMin)/(lngMax-lngMin))*W, H-((lat-latMin)/(latMax-latMin))*H];
+  }
+  const cityDots=[
+    {n:'Abbottabad',lat:34.148,lng:73.199,cov:true},{n:'Islamabad',lat:33.684,lng:73.048,cov:true},
+    {n:'Rawalpindi',lat:33.565,lng:73.017,cov:true},{n:'Peshawar',lat:34.015,lng:71.525,cov:true},
+    {n:'Mansehra',lat:34.330,lng:73.198,cov:true},{n:'Haripur',lat:33.998,lng:72.934,cov:true},
+    {n:'Murree',lat:33.907,lng:73.394,cov:true},{n:'Lahore',lat:31.520,lng:74.359,cov:false},
+    {n:'Karachi',lat:24.860,lng:67.001,cov:false},{n:'Quetta',lat:30.180,lng:66.975,cov:false},
+    {n:'Multan',lat:30.158,lng:71.525,cov:false},{n:'Faisalabad',lat:31.450,lng:73.135,cov:false},
+  ];
+  const pkPath='M300,30 L320,40 L348,34 L376,50 L396,65 L412,82 L422,106 L426,130 L422,154 L410,172 L398,190 L384,208 L368,228 L352,248 L336,270 L320,292 L304,314 L288,336 L274,360 L262,384 L256,400 L251,385 L256,362 L260,340 L255,318 L243,296 L226,274 L208,252 L192,228 L176,204 L165,178 L163,152 L170,126 L163,100 L170,78 L186,62 L208,48 L234,38 L263,30 Z';
+  const shown=services.filter(s=>!activeCat||s.cat===activeCat);
+  const[hov,setHov]=useState(null);
+  return(
+    <div style={{background:'#07091A',borderRadius:20,overflow:'hidden',border:'1px solid #1A1F40',position:'relative'}}>
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 40% 35%, #5B3FFF0A 0%, transparent 60%)',pointerEvents:'none'}}/>
+      <div style={{padding:'12px 16px 8px',display:'flex',gap:8,flexWrap:'wrap'}}>
+        {CATS.map(c=>(
+          <span key={c.id} style={{fontSize:9,color:'#4A5080',display:'flex',alignItems:'center',gap:3,fontWeight:600,letterSpacing:0.5}}>
+            <span style={{width:7,height:7,borderRadius:'50%',background:c.color,display:'inline-block',boxShadow:`0 0 5px ${c.color}`}}/>
+            {c.label.toUpperCase()}
+          </span>
+        ))}
+      </div>
+      <svg width='100%' viewBox={`0 0 ${W} ${H}`} style={{display:'block'}}>
+        <defs>
+          <radialGradient id='mg' cx='40%' cy='35%' r='55%'>
+            <stop offset='0%' stopColor='#5B3FFF' stopOpacity='0.1'/>
+            <stop offset='100%' stopColor='transparent'/>
+          </radialGradient>
+          <filter id='gf'><feGaussianBlur stdDeviation='2'/></filter>
+          <filter id='pf'><feGaussianBlur stdDeviation='1.5' result='b'/><feMerge><feMergeNode in='b'/><feMergeNode in='SourceGraphic'/></feMerge></filter>
+        </defs>
+        <rect width={W} height={H} fill='#05071A'/>
+        <rect width={W} height={H} fill='url(#mg)'/>
+        <path d={pkPath} fill='#0C1435' stroke='#2A3E9A' strokeWidth='2' strokeLinejoin='round'/>
+        {cityDots.map(cd=>{
+          const[x,y]=proj(cd.lat,cd.lng);
+          return(
+            <g key={cd.n}>
+              {cd.cov&&<circle cx={x} cy={y} r='20' fill='#5B3FFF' opacity='0.07'/>}
+              <circle cx={x} cy={y} r={cd.cov?5.5:3} fill={cd.cov?'#7C6BFF':'#1E2550'} stroke={cd.cov?'#A89BFF':'#2A3060'} strokeWidth='1.5' filter='url(#pf)'/>
+              <text x={x+9} y={y+4} fill={cd.cov?'#9C8BFF':'#2A3060'} fontSize='7.5' fontFamily='Plus Jakarta Sans,sans-serif' fontWeight='600'>{cd.n}</text>
+            </g>
+          );
+        })}
+        {shown.map((s,i)=>{
+          const[x,y]=proj(s.lat,s.lng);
+          const c=CMAP[s.cat]||'#5B3FFF';
+          const sel=selectedId===s.id;
+          const isHov=hov===s.id;
+          return(
+            <g key={s.id} style={{cursor:'pointer'}} onClick={()=>onPinClick&&onPinClick(s)}
+              onMouseEnter={()=>setHov(s.id)} onMouseLeave={()=>setHov(null)}>
+              {(sel||isHov)&&<circle cx={x} cy={y} r='22' fill={c} opacity='0.12'/>}
+              <ellipse cx={x} cy={y+2} rx='5' ry='2' fill='#000' opacity='0.4' filter='url(#gf)'/>
+              <polygon points={`${x},${y-16} ${x+8},${y} ${x-8},${y}`} fill={c} stroke='#fff' strokeWidth='1.2'
+                filter='url(#pf)'
+                style={{animation:sel?'pinBounce 1.5s ease-in-out infinite':`floatUp ${3+i*0.2}s ease-in-out ${i*0.15}s infinite`,
+                  filter:`drop-shadow(0 2px 8px ${c}88)`}}/>
+              <circle cx={x} cy={y-16} r='6' fill={c} filter='url(#pf)'/>
+              <text x={x} y={y-13} textAnchor='middle' fill='#fff' fontSize='7' fontFamily='sans-serif'>{s.icon}</text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   SERVICE CARD
+═══════════════════════════════════════════ */
+function ServiceCard({s,onBook,onSelect,sel,delay=0}){
+  const[hov,setHov]=useState(false);
+  const c=CMAP[s.cat]||'#5B3FFF';
+  const isAvail=s.avail!==false;
+  const cat=CATS.find(x=>x.id===s.cat);
+  return(
+    <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={()=>onSelect&&onSelect(s)}
+      style={{background:sel?`linear-gradient(145deg,${c}15,#0A0D20)`:'linear-gradient(145deg,#0A0D20,#06091A)',
+        border:`1.5px solid ${hov||sel?c+'88':c+'18'}`,borderRadius:18,padding:18,
+        position:'relative',overflow:'hidden',cursor:'pointer',
+        transition:'all 0.28s cubic-bezier(.4,0,.2,1)',
+        transform:hov?'translateY(-5px)':'none',
+        boxShadow:hov?`0 16px 40px ${c}22`:'0 2px 12px #00000055',
+        animation:`cardSlide 0.45s ease ${delay*0.06}s both`}}>
+      <div style={{position:'absolute',top:0,right:0,width:100,height:100,
+        background:`radial-gradient(circle,${c}14,transparent)`,borderRadius:'0 18px 0 0',pointerEvents:'none'}}/>
+      {s.verified&&(
+        <div style={{position:'absolute',top:12,right:12,
+          background:'#10B98122',color:'#10B981',border:'1px solid #10B98144',
+          borderRadius:20,padding:'2px 8px',fontSize:9,fontWeight:700,letterSpacing:0.5,
+          boxShadow:'0 0 10px #10B98144'}}>✓ VERIFIED</div>
+      )}
+      <div style={{display:'flex',gap:12,marginBottom:10}}>
+        <div style={{width:50,height:50,borderRadius:14,flexShrink:0,
+          background:`linear-gradient(135deg,${c}30,${c}10)`,
+          border:`1px solid ${c}40`,display:'flex',alignItems:'center',justifyContent:'center',
+          fontSize:24,animation:`floatUp ${2.8+delay*0.1}s ease-in-out ${delay*0.1}s infinite`,
+          boxShadow:`0 4px 16px ${c}30`}}>{s.icon}</div>
+        <div style={{flex:1,minWidth:0}}>
+          <h3 style={{color:'#ECF0FF',fontSize:13.5,fontWeight:700,margin:'0 0 2px',
+            lineHeight:1.3,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{s.name}</h3>
+          <p style={{color:'#445588',fontSize:10.5,margin:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>📍 {s.city} · {s.address}</p>
+          <div style={{marginTop:4,display:'flex',alignItems:'center',gap:4}}>
+            {[1,2,3,4,5].map(i=>(
+              <span key={i} style={{color:i<=Math.round(s.rating)?'#F59E0B':'#1E2550',fontSize:11,
+                animation:`starPop 0.3s ease ${i*0.05}s both`,display:'inline-block'}}
+              >★</span>
+            ))}
+            <span style={{color:'#2A3560',fontSize:10,marginLeft:2}}>{s.rating}</span>
+          </div>
+        </div>
+      </div>
+      {s.desc&&<p style={{color:'#4A5580',fontSize:11,margin:'0 0 10px',lineHeight:1.55,
+        display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{s.desc}</p>}
+      <div style={{display:'flex',flexWrap:'wrap',gap:5,marginBottom:12}}>
+        {s.tag&&<span style={{background:c+'18',color:c,border:`1px solid ${c}33`,
+          borderRadius:20,padding:'2px 9px',fontSize:9.5,fontWeight:600}}>{s.tag}</span>}
+        {s.beds&&<span style={{background:'#1A2040',color:'#6677AA',borderRadius:20,padding:'2px 9px',fontSize:9.5,fontWeight:600,border:'1px solid #2A3060'}}>{s.beds}bd·{s.baths}ba·{s.area}</span>}
+        <span style={{background:isAvail?'#10B98115':'#EF444415',color:isAvail?'#10B981':'#EF4444',
+          border:`1px solid ${isAvail?'#10B98130':'#EF444430'}`,
+          borderRadius:20,padding:'2px 9px',fontSize:9.5,fontWeight:700}}>
+          {isAvail?'● Open':'● Closed'}
+        </span>
+      </div>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div>
+          <p style={{color:c,fontWeight:800,fontSize:15,margin:0,
+            textShadow:`0 0 20px ${c}55`}}>{s.price}</p>
+          {s.phone&&<p style={{color:'#2A3560',fontSize:10,margin:'2px 0 0'}}>📞 {s.phone}</p>}
+        </div>
+        <button onClick={e=>{e.stopPropagation();onBook&&onBook(s);}} style={{
+          background:`linear-gradient(135deg,${c},${c}CC)`,border:'none',borderRadius:12,
+          padding:'9px 18px',color:'#fff',fontWeight:700,fontSize:12,cursor:'pointer',
+          boxShadow:`0 4px 16px ${c}44`,transition:'all 0.2s',flexShrink:0}}
+          onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.06)';e.currentTarget.style.boxShadow=`0 6px 22px ${c}66`}}
+          onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)';e.currentTarget.style.boxShadow=`0 4px 16px ${c}44`}}>
+          Book Now →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   BOOKING MODAL
+═══════════════════════════════════════════ */
+function BookingModal({s,user,onClose}){
+  const[name,setName]=useState(user?.name||'');
+  const[phone,setPhone]=useState(user?.phone||'');
+  const[date,setDate]=useState('');
+  const[note,setNote]=useState('');
+  const[done,setDone]=useState(false);
+  const[code,setCode]=useState('');
+  const c=CMAP[s.cat]||'#5B3FFF';
+
+  function confirm(){
+    if(!name||!phone){toast('Please fill your name and phone','error');return;}
+    const cd=genCode();
+    setCode(cd);
+    const bk={id:'bk'+Date.now(),serviceId:s.id,serviceName:s.name,serviceIcon:s.icon,
+      userId:user?.id||'guest',userName:name,phone,date,note,code:cd,status:'confirmed',
+      createdAt:new Date().toISOString()};
+    const prev=DB.get('bookings')||[];
+    DB.set('bookings',[...prev,bk]);
+    setDone(true);
+    toast('Booking confirmed! Save your code.','success');
+  }
+
+  const iStyle={width:'100%',background:'#07091A',border:'1px solid #1A2040',borderRadius:10,
+    padding:'11px 14px',color:'#ECF0FF',fontSize:13};
+
+  return(
+    <div style={{position:'fixed',inset:0,background:'#000000EE',zIndex:3000,display:'flex',
+      alignItems:'center',justifyContent:'center',padding:16,backdropFilter:'blur(12px)',animation:'fadeIn 0.2s ease'}}>
+      <div style={{background:'#090B1C',border:`1px solid ${c}44`,borderRadius:22,width:'100%',
+        maxWidth:420,position:'relative',animation:'zoomIn 0.3s ease',overflow:'hidden'}}>
+        <div style={{height:3,background:`linear-gradient(90deg,${c},${c}88,transparent)`}}/>
+        <div style={{padding:26}}>
+          {!done?(
+            <>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:18}}>
+                <div>
+                  <span style={{fontSize:30}}>{s.icon}</span>
+                  <h3 style={{color:'#ECF0FF',margin:'6px 0 2px',fontSize:15,fontWeight:700}}>{s.name}</h3>
+                  <p style={{color:'#445588',fontSize:11}}>📍 {s.city} · {s.address}</p>
+                </div>
+                <button onClick={onClose} style={{background:'#1A2040',border:'none',borderRadius:8,
+                  width:30,height:30,color:'#445588',cursor:'pointer',fontSize:14,flexShrink:0}}>✕</button>
+              </div>
+              <div style={{background:`${c}12`,border:`1px solid ${c}30`,borderRadius:12,
+                padding:'10px 14px',marginBottom:16,display:'flex',gap:10,alignItems:'center'}}>
+                <span style={{fontSize:22,animation:'floatUp 2.5s ease-in-out infinite',display:'inline-block'}}>🛡️</span>
+                <div>
+                  <p style={{color:c,fontSize:11,fontWeight:700,margin:'0 0 2px'}}>Anti-Scam Protection</p>
+                  <p style={{color:'#445588',fontSize:10,margin:0}}>You get a unique code — service provider must match it</p>
+                </div>
+              </div>
+              {[['👤 Your Name','text',name,setName,'Your full name'],
+                ['📞 Phone','tel',phone,setPhone,'03XX-XXXXXXX'],
+                ['📅 Date (optional)','date',date,setDate,'']].map(([l,t,v,sv,ph])=>(
+                <div key={l} style={{marginBottom:11}}>
+                  <label style={{color:'#4A5580',fontSize:10.5,display:'block',marginBottom:3,fontWeight:600}}>{l}</label>
+                  <input type={t} placeholder={ph} value={v} onChange={e=>sv(e.target.value)}
+                    style={iStyle} onFocus={e=>e.target.style.borderColor=c} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+                </div>
+              ))}
+              <div style={{marginBottom:14}}>
+                <label style={{color:'#4A5580',fontSize:10.5,display:'block',marginBottom:3,fontWeight:600}}>📝 Note (optional)</label>
+                <textarea placeholder='Any special instructions...' value={note} onChange={e=>setNote(e.target.value)} rows={2}
+                  style={{...iStyle,resize:'none'}} onFocus={e=>e.target.style.borderColor=c} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+              </div>
+              <button onClick={confirm} style={{width:'100%',background:`linear-gradient(135deg,${c},${c}AA)`,
+                border:'none',borderRadius:12,padding:'13px',color:'#fff',fontWeight:700,cursor:'pointer',
+                fontSize:14,boxShadow:`0 4px 22px ${c}44`}}
+                onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.02)'}}
+                onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)'}}>
+                Get Verification Code →
+              </button>
+            </>
+          ):(
+            <div style={{textAlign:'center',padding:'8px 0'}}>
+              <div style={{fontSize:54,animation:'floatUp 2.5s ease-in-out infinite',display:'inline-block'}}>✅</div>
+              <h3 style={{color:'#10B981',margin:'14px 0 6px',fontSize:18,fontWeight:800}}>Booking Confirmed!</h3>
+              <p style={{color:'#445588',fontSize:12,marginBottom:18}}>Show this code to your service provider on arrival:</p>
+              <div style={{background:'#05071A',border:`2px solid ${c}`,borderRadius:16,padding:'20px 16px',marginBottom:18,position:'relative',overflow:'hidden'}}>
+                <div style={{position:'absolute',inset:0,background:`radial-gradient(circle,${c}0A,transparent)`,pointerEvents:'none'}}/>
+                <p style={{color:'#2A3560',fontSize:9,letterSpacing:3,textTransform:'uppercase',margin:'0 0 10px',fontWeight:600}}>YOUR UNIQUE VERIFICATION CODE</p>
+                <div style={{fontSize:26,fontWeight:900,letterSpacing:7,color:c,fontFamily:'monospace',
+                  animation:'codeGlow 2s ease-in-out infinite'}}>{code}</div>
+                <p style={{color:'#2A3560',fontSize:9,marginTop:10}}>🔒 Provider must verify this code before starting work</p>
+              </div>
+              <div style={{background:'#07091A',borderRadius:12,padding:'12px 14px',textAlign:'left',marginBottom:16}}>
+                <p style={{color:'#4A5580',fontSize:10,margin:'0 0 6px',fontWeight:700}}>BOOKING SUMMARY</p>
+                <p style={{color:'#ECF0FF',fontSize:12,margin:'2px 0'}}>{s.icon} {s.name}</p>
+                <p style={{color:'#445588',fontSize:11,margin:'2px 0'}}>👤 {name} · 📞 {phone}</p>
+                {date&&<p style={{color:'#445588',fontSize:11,margin:'2px 0'}}>📅 {date}</p>}
+                <p style={{color:'#445588',fontSize:11,margin:'4px 0 0'}}>📞 Provider: {s.phone}</p>
+              </div>
+              <div style={{display:'flex',gap:8}}>
+                <button onClick={()=>{
+                  const txt=`ShahBaaz Booking\nService: ${s.name}\nCode: ${code}\nName: ${name}\nPhone: ${phone}`;
+                  window.open(`https://wa.me/${s.phone?.replace(/\D/g,'')}?text=${encodeURIComponent(txt)}`);
+                }} style={{flex:1,background:'#25D36622',border:'1px solid #25D36644',borderRadius:10,
+                  padding:'10px',color:'#25D366',cursor:'pointer',fontWeight:700,fontSize:12}}>
+                  📲 WhatsApp Provider
+                </button>
+                <button onClick={onClose} style={{flex:1,background:`linear-gradient(135deg,${c},${c}AA)`,
+                  border:'none',borderRadius:10,padding:'10px',color:'#fff',cursor:'pointer',fontWeight:700,fontSize:12}}>
+                  Done ✓
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   AUTH MODAL
+═══════════════════════════════════════════ */
+function AuthModal({initMode,onSuccess,onClose}){
+  const[mode,setMode]=useState(initMode||'login');
+  const[name,setName]=useState('');
+  const[email,setEmail]=useState('');
+  const[pw,setPw]=useState('');
+  const[phone,setPhone]=useState('');
+  const[err,setErr]=useState('');
+  const[loading,setLoading]=useState(false);
+  const[showPw,setShowPw]=useState(false);
+
+  const iStyle={width:'100%',background:'#07091A',border:'1px solid #1A2040',borderRadius:10,
+    padding:'11px 14px',color:'#ECF0FF',fontSize:13,transition:'border-color 0.2s'};
+
+  function login(){
+    setErr('');setLoading(true);
+    setTimeout(()=>{
+      const users=DB.get('users')||[];
+      const u=users.find(x=>x.email===email&&x.password===pw);
+      if(u){DB.set('session',u);onSuccess(u);toast(`Welcome back, ${u.name}! 👋`,'success');}
+      else setErr('Incorrect email or password');
+      setLoading(false);
+    },700);
+  }
+  function register(){
+    setErr('');
+    if(!name||!email||!pw||!phone){setErr('All fields are required');return;}
+    if(pw.length<6){setErr('Password must be at least 6 characters');return;}
+    if(!email.includes('@')){setErr('Enter a valid email');return;}
+    const users=DB.get('users')||[];
+    if(users.find(x=>x.email===email)){setErr('This email is already registered');return;}
+    setLoading(true);
+    setTimeout(()=>{
+      const u={id:'u'+Date.now(),name,email,password:pw,phone,role:'user',avatar:'👤',
+        joined:new Date().toISOString().split('T')[0],verified:false};
+      DB.set('users',[...users,u]);
+      DB.set('session',u);
+      onSuccess(u);
+      toast(`Welcome to ShahBaaz, ${u.name}! 🎉`,'success');
+      setLoading(false);
+    },700);
+  }
+  function handleKey(e){if(e.key==='Enter'){mode==='login'?login():register();}}
+
+  return(
+    <div style={{position:'fixed',inset:0,background:'#000000F0',zIndex:4000,display:'flex',
+      alignItems:'center',justifyContent:'center',padding:16,backdropFilter:'blur(14px)',animation:'fadeIn 0.2s ease'}}>
+      <div style={{background:'#090B1C',border:'1px solid #5B3FFF44',borderRadius:24,
+        width:'100%',maxWidth:380,overflow:'hidden',animation:'zoomIn 0.3s ease',position:'relative'}}>
+        <div style={{height:3,background:'linear-gradient(90deg,#5B3FFF,#38BDF8,#10B981)',backgroundSize:'300%',animation:'gradientFlow 3s ease infinite'}}/>
+        <div style={{padding:'28px 26px 24px'}}>
+          <div style={{textAlign:'center',marginBottom:22}}>
+            <div style={{fontSize:46,display:'inline-block',animation:'floatUp 2.5s ease-in-out infinite',
+              filter:'drop-shadow(0 0 16px #5B3FFF88)'}}>🦅</div>
+            <h2 style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:800,fontSize:20,
+              margin:'10px 0 4px',background:'linear-gradient(90deg,#A78BFA,#38BDF8)',
+              WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>
+              {mode==='login'?'Welcome Back!':'Create Account'}
+            </h2>
+            <p style={{color:'#2A3560',fontSize:11,fontWeight:500}}>ShahBaaz · Abbottabad's Super App</p>
+          </div>
+          <div style={{display:'flex',background:'#07091A',borderRadius:12,padding:3,marginBottom:20,border:'1px solid #1A2040'}}>
+            {[['login','Sign In'],['register','Sign Up']].map(([m,l])=>(
+              <button key={m} onClick={()=>{setMode(m);setErr('');}}
+                style={{flex:1,background:mode===m?'linear-gradient(135deg,#5B3FFF,#4030CC)':'transparent',
+                  border:'none',borderRadius:10,padding:'9px',color:mode===m?'#fff':'#2A3560',
+                  cursor:'pointer',fontSize:12,fontWeight:700,transition:'all 0.2s'}}>{l}</button>
+            ))}
+          </div>
+          {mode==='register'&&(
+            <div style={{marginBottom:11}}>
+              <label style={{color:'#4A5580',fontSize:10.5,display:'block',marginBottom:3,fontWeight:600}}>Full Name</label>
+              <input type='text' placeholder='Muhammad Ali' value={name} onChange={e=>setName(e.target.value)} onKeyDown={handleKey}
+                style={iStyle} onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+            </div>
+          )}
+          <div style={{marginBottom:11}}>
+            <label style={{color:'#4A5580',fontSize:10.5,display:'block',marginBottom:3,fontWeight:600}}>Email Address</label>
+            <input type='email' placeholder='you@example.com' value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={handleKey}
+              style={iStyle} onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+          </div>
+          <div style={{marginBottom:11}}>
+            <label style={{color:'#4A5580',fontSize:10.5,display:'block',marginBottom:3,fontWeight:600}}>Password</label>
+            <div style={{position:'relative'}}>
+              <input type={showPw?'text':'password'} placeholder='••••••••' value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={handleKey}
+                style={{...iStyle,paddingRight:40}} onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+              <button onClick={()=>setShowPw(!showPw)} style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',
+                background:'none',border:'none',color:'#2A3560',cursor:'pointer',fontSize:14}}>{showPw?'🙈':'👁️'}</button>
+            </div>
+          </div>
+          {mode==='register'&&(
+            <div style={{marginBottom:11}}>
+              <label style={{color:'#4A5580',fontSize:10.5,display:'block',marginBottom:3,fontWeight:600}}>Phone Number</label>
+              <input type='tel' placeholder='0300-1234567' value={phone} onChange={e=>setPhone(e.target.value)} onKeyDown={handleKey}
+                style={iStyle} onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+            </div>
+          )}
+          {err&&<div style={{background:'#EF444418',border:'1px solid #EF444440',borderRadius:8,
+            padding:'8px 12px',color:'#EF4444',fontSize:11.5,marginBottom:12,animation:'fadeUp 0.2s ease'}}>⚠️ {err}</div>}
+          <button onClick={mode==='login'?login:register} disabled={loading}
+            style={{width:'100%',background:loading?'#1A2040':'linear-gradient(135deg,#5B3FFF,#4030CC)',
+              border:'none',borderRadius:12,padding:'13px',color:'#fff',fontWeight:700,
+              cursor:loading?'not-allowed':'pointer',fontSize:14,marginBottom:12,
+              boxShadow:loading?'none':'0 4px 22px #5B3FFF44',transition:'all 0.2s'}}
+            onMouseEnter={e=>{if(!loading){e.currentTarget.style.transform='scale(1.02)';e.currentTarget.style.boxShadow='0 6px 28px #5B3FFF66'}}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)';e.currentTarget.style.boxShadow='0 4px 22px #5B3FFF44'}}>
+            {loading?'⏳ Please wait...':(mode==='login'?'Sign In →':'Create My Account →')}
+          </button>
+          {mode==='login'&&(
+            <div style={{background:'#07091A',borderRadius:10,padding:'10px 14px',fontSize:10.5,color:'#2A3560',border:'1px solid #1A2040',marginBottom:10}}>
+              <p style={{margin:'0 0 3px',fontWeight:700,color:'#3A4580'}}>Demo Accounts:</p>
+              <p style={{margin:'1px 0'}}>👑 Admin: ashhad@shahbaaz.pk / admin123</p>
+              <p style={{margin:'1px 0'}}>👤 User: ali@test.pk / pass123</p>
+            </div>
+          )}
+          <button onClick={onClose} style={{width:'100%',background:'none',border:'none',color:'#1A2040',fontSize:11,cursor:'pointer',padding:'6px'}}>Continue without account</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   ADD SERVICE MODAL
+═══════════════════════════════════════════ */
+function AddServiceModal({user,onDone,onClose}){
+  const[step,setStep]=useState(1);
+  const[cat,setCat]=useState('technicians');
+  const[name,setName]=useState('');
+  const[icon,setIcon]=useState('📌');
+  const[city,setCity]=useState('Abbottabad');
+  const[address,setAddress]=useState('');
+  const[desc,setDesc]=useState('');
+  const[price,setPrice]=useState('');
+  const[phone,setPhone]=useState(user?.phone||'');
+  const[tag,setTag]=useState('');
+  const[lat,setLat]=useState('');
+  const[lng,setLng]=useState('');
+  const[done,setDone]=useState(false);
+
+  const iStyle={width:'100%',background:'#07091A',border:'1px solid #1A2040',borderRadius:10,
+    padding:'10px 13px',color:'#ECF0FF',fontSize:12.5,transition:'border-color 0.2s'};
+  const lStyle={color:'#4A5580',fontSize:10.5,display:'block',marginBottom:3,fontWeight:600};
+
+  function save(){
+    if(!name||!lat||!lng){toast('Name, Latitude and Longitude are required','error');return;}
+    const svc={id:'s'+Date.now(),cat,name,icon,city,address,desc,price,phone,tag,
+      lat:parseFloat(lat),lng:parseFloat(lng),rating:4.5,avail:true,owner:user?.id||'guest',verified:false};
+    const prev=DB.get('services')||[];
+    DB.set('services',[...prev,svc]);
+    setDone(true);
+    toast('Your service is now live on the map! 📍','success');
+    if(onDone)onDone(svc);
+  }
+
+  if(done)return(
+    <div style={{position:'fixed',inset:0,background:'#000000EE',zIndex:3000,display:'flex',
+      alignItems:'center',justifyContent:'center',padding:16,backdropFilter:'blur(12px)'}}>
+      <div style={{background:'#090B1C',border:'1px solid #10B98144',borderRadius:22,padding:36,textAlign:'center',maxWidth:340,animation:'zoomIn 0.3s ease'}}>
+        <div style={{fontSize:60,animation:'floatUp 2.5s ease-in-out infinite',display:'inline-block'}}>🎉</div>
+        <h3 style={{color:'#10B981',margin:'16px 0 8px',fontSize:19,fontWeight:800}}>Service Listed!</h3>
+        <p style={{color:'#445588',fontSize:12,marginBottom:6}}><strong style={{color:'#ECF0FF'}}>{name}</strong> is now live</p>
+        <p style={{color:'#2A3560',fontSize:11,marginBottom:20}}>📍 Pinned at {lat}°N, {lng}°E · Visible on map instantly</p>
+        <button onClick={onClose} style={{background:'linear-gradient(135deg,#10B981,#059669)',border:'none',borderRadius:12,
+          padding:'11px 28px',color:'#fff',cursor:'pointer',fontWeight:700,fontSize:13}}>View on Map →</button>
+      </div>
+    </div>
+  );
+
+  return(
+    <div style={{position:'fixed',inset:0,background:'#000000EE',zIndex:3000,display:'flex',
+      alignItems:'center',justifyContent:'center',padding:16,backdropFilter:'blur(12px)',animation:'fadeIn 0.2s ease'}}>
+      <div style={{background:'#090B1C',border:'1px solid #5B3FFF44',borderRadius:22,width:'100%',
+        maxWidth:500,maxHeight:'90vh',overflowY:'auto',animation:'zoomIn 0.3s ease'}}>
+        <div style={{padding:'18px 22px',borderBottom:'1px solid #1A2040',display:'flex',
+          justifyContent:'space-between',alignItems:'center',position:'sticky',top:0,background:'#090B1C',zIndex:1}}>
+          <div>
+            <h2 style={{color:'#A78BFA',margin:0,fontSize:16,fontWeight:700}}>➕ List Your Service</h2>
+            <p style={{color:'#2A3560',margin:'2px 0 0',fontSize:10}}>Step {step}/2 · Free forever on ShahBaaz</p>
+          </div>
+          <button onClick={onClose} style={{background:'#EF444418',border:'1px solid #EF444440',borderRadius:8,
+            padding:'5px 11px',color:'#EF4444',cursor:'pointer',fontSize:11}}>✕ Cancel</button>
+        </div>
+        <div style={{padding:'18px 22px'}}>
+          {step===1&&(
+            <div style={{animation:'fadeUp 0.3s ease'}}>
+              <p style={{color:'#4A5580',fontSize:11,marginBottom:14,fontWeight:600}}>STEP 1 — Basic Information</p>
+              <div style={{marginBottom:12}}>
+                <label style={lStyle}>Category</label>
+                <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                  {CATS.map(ct=>(
+                    <button key={ct.id} onClick={()=>setCat(ct.id)} style={{
+                      background:cat===ct.id?ct.color+'22':'#07091A',
+                      border:`1px solid ${cat===ct.id?ct.color:'#1A2040'}`,
+                      borderRadius:8,padding:'6px 11px',color:cat===ct.id?ct.color:'#2A3560',
+                      cursor:'pointer',fontSize:11,fontWeight:600,transition:'all 0.2s'}}>
+                      {ct.icon} {ct.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 80px',gap:10,marginBottom:11}}>
+                <div>
+                  <label style={lStyle}>Service / Business Name *</label>
+                  <input value={name} onChange={e=>setName(e.target.value)} placeholder='e.g. Ahmad Electrical Works' style={iStyle}
+                    onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+                </div>
+                <div>
+                  <label style={lStyle}>Icon</label>
+                  <input value={icon} onChange={e=>setIcon(e.target.value)} placeholder='⚡' style={iStyle}
+                    onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+                </div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:11}}>
+                <div>
+                  <label style={lStyle}>City</label>
+                  <select value={city} onChange={e=>setCity(e.target.value)} style={iStyle}
+                    onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}>
+                    {COVERED.map(c=><option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={lStyle}>Category Tag</label>
+                  <input value={tag} onChange={e=>setTag(e.target.value)} placeholder='e.g. Electrician' style={iStyle}
+                    onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+                </div>
+              </div>
+              <div style={{marginBottom:11}}>
+                <label style={lStyle}>Full Address</label>
+                <input value={address} onChange={e=>setAddress(e.target.value)} placeholder='Shop 4, Mandian Bazaar, Abbottabad' style={iStyle}
+                  onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+              </div>
+              <div style={{marginBottom:11}}>
+                <label style={lStyle}>Description</label>
+                <textarea value={desc} onChange={e=>setDesc(e.target.value)} placeholder='Describe your service clearly...' rows={3}
+                  style={{...iStyle,resize:'none'}} onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
+                <div>
+                  <label style={lStyle}>Price / Rate</label>
+                  <input value={price} onChange={e=>setPrice(e.target.value)} placeholder='PKR 2,000/visit' style={iStyle}
+                    onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+                </div>
+                <div>
+                  <label style={lStyle}>Contact Phone *</label>
+                  <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder='03XX-XXXXXXX' style={iStyle}
+                    onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+                </div>
+              </div>
+              <button onClick={()=>setStep(2)} style={{width:'100%',background:'linear-gradient(135deg,#5B3FFF,#4030CC)',
+                border:'none',borderRadius:12,padding:'12px',color:'#fff',fontWeight:700,cursor:'pointer',fontSize:13,
+                boxShadow:'0 4px 20px #5B3FFF44'}}>Next: Add Location on Map →</button>
+            </div>
+          )}
+          {step===2&&(
+            <div style={{animation:'fadeUp 0.3s ease'}}>
+              <p style={{color:'#4A5580',fontSize:11,marginBottom:14,fontWeight:600}}>STEP 2 — Precise Map Location</p>
+              <div style={{background:'#5B3FFF12',border:'1px solid #5B3FFF30',borderRadius:12,padding:'12px 14px',marginBottom:14}}>
+                <p style={{color:'#A78BFA',fontSize:11,fontWeight:700,margin:'0 0 4px'}}>📍 How to find your coordinates:</p>
+                <p style={{color:'#2A3560',fontSize:10.5,margin:'0 0 2px'}}>1. Open <strong style={{color:'#A78BFA'}}>Google Maps</strong> on your phone or PC</p>
+                <p style={{color:'#2A3560',fontSize:10.5,margin:'0 0 2px'}}>2. Find your exact location on the map</p>
+                <p style={{color:'#2A3560',fontSize:10.5,margin:0}}>3. Long-press (or right-click) → copy the numbers shown</p>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:14}}>
+                <div>
+                  <label style={lStyle}>Latitude * <span style={{color:'#2A3560'}}>(e.g. 34.1480)</span></label>
+                  <input value={lat} onChange={e=>setLat(e.target.value)} placeholder='34.1480' style={iStyle}
+                    onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+                </div>
+                <div>
+                  <label style={lStyle}>Longitude * <span style={{color:'#2A3560'}}>(e.g. 73.1994)</span></label>
+                  <input value={lng} onChange={e=>setLng(e.target.value)} placeholder='73.1994' style={iStyle}
+                    onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+                </div>
+              </div>
+              {lat&&lng&&(
+                <div style={{background:'#10B98115',border:'1px solid #10B98130',borderRadius:10,padding:'10px 14px',marginBottom:14,animation:'fadeUp 0.2s ease'}}>
+                  <p style={{color:'#10B981',fontSize:11,fontWeight:700,margin:'0 0 2px'}}>✓ Location Preview</p>
+                  <p style={{color:'#4A5580',fontSize:11,margin:0}}>Your pin will appear at {lat}°N, {lng}°E on the Pakistan map</p>
+                </div>
+              )}
+              <div style={{display:'flex',gap:8}}>
+                <button onClick={()=>setStep(1)} style={{flex:1,background:'#1A2040',border:'1px solid #2A3060',
+                  borderRadius:12,padding:'12px',color:'#4A5580',cursor:'pointer',fontSize:12}}>← Back</button>
+                <button onClick={save} style={{flex:2,background:'linear-gradient(135deg,#10B981,#059669)',
+                  border:'none',borderRadius:12,padding:'12px',color:'#fff',fontWeight:700,cursor:'pointer',fontSize:13,
+                  boxShadow:'0 4px 20px #10B98144'}}>🚀 Publish & Pin on Map</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   ADMIN PANEL
+═══════════════════════════════════════════ */
+function AdminPanel({onUpdate,onClose,user}){
+  const[tab,setTab]=useState('services');
+  const[msg,setMsg]=useState('');
+  const svcs=DB.get('services')||[];
+  const users=DB.get('users')||[];
+  const bookings=DB.get('bookings')||[];
+
+  function delService(id){DB.set('services',svcs.filter(s=>s.id!==id));setMsg('Removed');onUpdate();setTimeout(()=>setMsg(''),2000);}
+  function toggleVerify(id){DB.set('services',svcs.map(s=>s.id===id?{...s,verified:!s.verified}:s));setMsg('Updated');onUpdate();setTimeout(()=>setMsg(''),2000);}
+
+  const tabBtn=(id,label)=>(
+    <button key={id} onClick={()=>setTab(id)} style={{background:tab===id?'#5B3FFF22':'#07091A',
+      border:`1px solid ${tab===id?'#5B3FFF':'#1A2040'}`,borderRadius:8,padding:'6px 14px',
+      color:tab===id?'#A78BFA':'#2A3560',cursor:'pointer',fontSize:11,fontWeight:600,textTransform:'capitalize'}}>
+      {label}
+    </button>
+  );
+
+  return(
+    <div style={{position:'fixed',inset:0,background:'#000000EE',zIndex:3000,display:'flex',
+      alignItems:'center',justifyContent:'center',padding:16,backdropFilter:'blur(12px)'}}>
+      <div style={{background:'#090B1C',border:'1px solid #5B3FFF55',borderRadius:22,width:'100%',
+        maxWidth:800,maxHeight:'90vh',overflowY:'auto',animation:'zoomIn 0.3s ease'}}>
+        <div style={{padding:'18px 22px',borderBottom:'1px solid #1A2040',display:'flex',
+          justifyContent:'space-between',alignItems:'center',position:'sticky',top:0,background:'#090B1C',zIndex:1}}>
+          <div>
+            <h2 style={{color:'#A78BFA',margin:0,fontSize:17,fontWeight:800}}>⚙️ Admin Dashboard</h2>
+            <p style={{color:'#1A2040',margin:'2px 0 0',fontSize:10}}>Logged as {user?.name} · ShahBaaz Admin</p>
+          </div>
+          <button onClick={onClose} style={{background:'#EF444418',border:'1px solid #EF444440',borderRadius:8,padding:'6px 12px',color:'#EF4444',cursor:'pointer',fontSize:11}}>✕ Close</button>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,padding:'14px 22px',borderBottom:'1px solid #1A2040'}}>
+          {[['Services',svcs.length,'#5B3FFF','🛎️'],['Users',users.length,'#10B981','👥'],['Bookings',bookings.length,'#F59E0B','📋'],['Revenue','Free','#EC4899','💰']].map(([l,n,c,ic])=>(
+            <div key={l} style={{background:'#07091A',borderRadius:12,padding:'12px 10px',textAlign:'center',border:`1px solid ${c}22`}}>
+              <div style={{fontSize:20,marginBottom:4}}>{ic}</div>
+              <div style={{color:c,fontSize:18,fontWeight:800}}>{n}</div>
+              <div style={{color:'#2A3560',fontSize:10,fontWeight:600}}>{l}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{padding:'12px 22px',display:'flex',gap:6,borderBottom:'1px solid #1A2040'}}>
+          {tabBtn('services','Services ('+svcs.length+')')}
+          {tabBtn('users','Users ('+users.length+')')}
+          {tabBtn('bookings','Bookings ('+bookings.length+')')}
+        </div>
+        {msg&&<div style={{margin:'10px 22px',padding:'8px 14px',background:'#10B98118',border:'1px solid #10B98140',borderRadius:8,color:'#10B981',fontSize:11}}>✓ {msg}</div>}
+        <div style={{padding:'14px 22px'}}>
+          {tab==='services'&&svcs.map(s=>(
+            <div key={s.id} style={{background:'#07091A',border:'1px solid #1A2040',borderRadius:12,
+              padding:'10px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8,gap:10}}>
+              <div style={{flex:1,minWidth:0}}>
+                <p style={{color:'#ECF0FF',margin:0,fontSize:12.5,fontWeight:600}}>{s.icon} {s.name}</p>
+                <p style={{color:'#1A2040',margin:'2px 0 0',fontSize:10}}>📍 {s.city} · {s.cat} · {s.lat},{s.lng}</p>
+              </div>
+              <div style={{display:'flex',gap:6,flexShrink:0}}>
+                <button onClick={()=>toggleVerify(s.id)} style={{background:s.verified?'#10B98115':'#1A2040',
+                  border:`1px solid ${s.verified?'#10B98140':'#2A3060'}`,borderRadius:7,padding:'4px 9px',
+                  color:s.verified?'#10B981':'#2A3560',cursor:'pointer',fontSize:10}}>
+                  {s.verified?'✓ Verified':'Verify'}
+                </button>
+                <button onClick={()=>delService(s.id)} style={{background:'#EF444415',border:'1px solid #EF444435',
+                  borderRadius:7,padding:'4px 9px',color:'#EF4444',cursor:'pointer',fontSize:10}}>🗑️</button>
+              </div>
+            </div>
+          ))}
+          {tab==='users'&&users.map(u=>(
+            <div key={u.id} style={{background:'#07091A',border:'1px solid #1A2040',borderRadius:12,
+              padding:'10px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+              <div>
+                <p style={{color:'#ECF0FF',margin:0,fontSize:12.5,fontWeight:600}}>{u.avatar} {u.name}</p>
+                <p style={{color:'#1A2040',margin:'2px 0 0',fontSize:10}}>{u.email} · {u.phone} · joined {u.joined}</p>
+              </div>
+              <span style={{background:u.role==='admin'?'#F59E0B18':'#5B3FFF18',color:u.role==='admin'?'#F59E0B':'#A78BFA',
+                border:`1px solid ${u.role==='admin'?'#F59E0B33':'#5B3FFF33'}`,borderRadius:20,padding:'2px 9px',fontSize:10,fontWeight:700}}>
+                {u.role}
+              </span>
+            </div>
+          ))}
+          {tab==='bookings'&&(bookings.length===0
+            ?<p style={{color:'#1A2040',textAlign:'center',padding:'30px 0',fontSize:13}}>No bookings yet</p>
+            :bookings.map(b=>(
+              <div key={b.id} style={{background:'#07091A',border:'1px solid #1A2040',borderRadius:12,padding:'10px 14px',marginBottom:8}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <p style={{color:'#ECF0FF',margin:0,fontSize:12.5,fontWeight:600}}>{b.serviceIcon} {b.serviceName}</p>
+                  <span style={{background:'#F59E0B18',color:'#F59E0B',border:'1px solid #F59E0B33',
+                    borderRadius:20,padding:'2px 9px',fontSize:10,fontFamily:'monospace',fontWeight:700,letterSpacing:1}}>{b.code}</span>
+                </div>
+                <p style={{color:'#1A2040',margin:'3px 0 0',fontSize:10}}>👤 {b.userName} · 📞 {b.phone}{b.date?` · 📅 ${b.date}`:''} · {new Date(b.createdAt).toLocaleDateString()}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   MAIN APP
+═══════════════════════════════════════════ */
+function App(){
+  const[splash,setSplash]=useState(true);
+  const[services,setServices]=useState([]);
+  const[user,setUser]=useState(null);
+  const[page,setPage]=useState('home');
+  const[activeCat,setActiveCat]=useState(null);
+  const[q,setQ]=useState('');
+  const[cityF,setCityF]=useState('All');
+  const[showMap,setShowMap]=useState(false);
+  const[selPin,setSelPin]=useState(null);
+  const[booking,setBooking]=useState(null);
+  const[showAdd,setShowAdd]=useState(false);
+  const[showAdmin,setShowAdmin]=useState(false);
+  const[showAuth,setShowAuth]=useState(false);
+  const[authMode,setAuthMode]=useState('login');
+  const[mobileMenu,setMobileMenu]=useState(false);
+  const[tick,setTick]=useState(0);
+
+  useEffect(()=>{
+    initDB();
+    const sess=DB.get('session');
+    if(sess)setUser(sess);
+    refresh();
+    setTimeout(()=>setSplash(false),2800);
+  },[]);
+
+  function refresh(){setServices(DB.get('services')||[]);setTick(t=>t+1);}
+
+  const filtered=useMemo(()=>{
+    return services.filter(s=>{
+      if(activeCat&&s.cat!==activeCat)return false;
+      if(q){const lq=q.toLowerCase();if(![s.name,s.city,s.tag,s.desc,s.address].some(v=>v&&v.toLowerCase().includes(lq)))return false;}
+      if(cityF!=='All'&&s.city!==cityF)return false;
+      return true;
+    });
+  },[services,activeCat,q,cityF,tick]);
+
+  const allCities=useMemo(()=>['All',...new Set(services.map(s=>s.city))]   ,[services]);
+
+  function logout(){DB.set('session',null);setUser(null);toast('Signed out successfully','info');}
+
+  /* SPLASH */
+  if(splash)return(
+    <div style={{minHeight:'100vh',background:'#02040A',display:'flex',flexDirection:'column',
+      alignItems:'center',justifyContent:'center',overflow:'hidden',position:'relative'}}>
+      <div style={{position:'absolute',inset:0}}>
+        {[...Array(20)].map((_,i)=>(
+          <div key={i} style={{position:'absolute',
+            left:`${Math.random()*100}%`,top:`${Math.random()*100}%`,
+            width:Math.random()*3+1,height:Math.random()*3+1,
+            borderRadius:'50%',background:'#5B3FFF',opacity:Math.random()*0.5+0.1,
+            animation:`floatUp ${2+Math.random()*3}s ease-in-out ${Math.random()*2}s infinite`}}/>
+        ))}
+      </div>
+      <div style={{textAlign:'center',position:'relative',animation:'splashLogo 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards'}}>
+        <div style={{fontSize:80,display:'inline-block',filter:'drop-shadow(0 0 30px #5B3FFF)',
+          animation:'floatUp 2.5s ease-in-out infinite'}}>🦅</div>
+        <h1 className='hero-title' style={{display:'block',marginTop:16}}>SHAHBAAZ</h1>
+        <p style={{color:'#2A3560',letterSpacing:6,fontSize:10,textTransform:'uppercase',
+          fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:600,marginTop:8}}>
+          ABBOTTABAD'S SUPER APP
+        </p>
+        <div style={{marginTop:24,display:'flex',gap:10,justifyContent:'center'}}>
+          {CATS.map((c,i)=>(
+            <span key={c.id} style={{fontSize:18,display:'inline-block',
+              animation:`floatUp ${1.8+i*0.2}s ease-in-out ${i*0.12}s infinite`,opacity:0.6,
+              filter:`drop-shadow(0 0 6px ${c.color})`}}>{c.icon}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  return(
+    <div style={{minHeight:'100vh',background:'#02040A'}}>
+      <Toast/>
+      {/* BG EFFECTS */}
+      <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:0,
+        background:'radial-gradient(ellipse at 15% 5%, #5B3FFF08 0%, transparent 45%), radial-gradient(ellipse at 85% 85%, #38BDF808 0%, transparent 45%)'}}/>
+
+      {/* HEADER */}
+      <header style={{background:'#060810EE',borderBottom:'1px solid #0F1328',
+        padding:'0 20px',position:'sticky',top:0,zIndex:200,backdropFilter:'blur(16px)'}}>
+        <div style={{maxWidth:1240,margin:'0 auto',display:'flex',alignItems:'center',
+          justifyContent:'space-between',height:60}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <span style={{fontSize:26,animation:'floatUp 2.5s ease-in-out infinite',display:'inline-block',
+              filter:'drop-shadow(0 0 12px #5B3FFF88)'}}>🦅</span>
+            <div>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,letterSpacing:1,
+                background:'linear-gradient(90deg,#A78BFA,#38BDF8)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>
+                SHAHBAAZ
+              </div>
+              <div style={{fontSize:7.5,color:'#1A2040',letterSpacing:4,textTransform:'uppercase',fontWeight:700,marginTop:-2}}>
+                ABBOTTABAD'S SUPER APP
+              </div>
+            </div>
+          </div>
+
+          {/* NAV */}
+          <nav style={{display:'flex',gap:6,alignItems:'center'}}>
+            {[['🏠','Home','home'],['🗺️','Map','map'],['💬','Reviews','reviews']].map(([ic,lb,pg])=>(
+              <button key={pg} onClick={()=>{setPage(pg);if(pg==='map')setShowMap(true);else setShowMap(pg==='map');}}
+                style={{background:page===pg?'#5B3FFF22':'transparent',border:`1px solid ${page===pg?'#5B3FFF44':'transparent'}`,
+                  borderRadius:8,padding:'6px 12px',color:page===pg?'#A78BFA':'#2A3560',cursor:'pointer',fontSize:11,fontWeight:600,
+                  display:'flex',alignItems:'center',gap:4,transition:'all 0.2s'}}>
+                <span style={{animation:page===pg?'floatUp 2.5s ease-in-out infinite':'none',display:'inline-block'}}>{ic}</span>
+                <span style={{display:'none'}}>{lb}</span>
+              </button>
+            ))}
+            {user?(
+              <div style={{display:'flex',gap:6,alignItems:'center'}}>
+                <button onClick={()=>setShowAdd(true)} style={{background:'linear-gradient(135deg,#10B981,#059669)',
+                  border:'none',borderRadius:10,padding:'7px 13px',color:'#fff',cursor:'pointer',fontSize:11,fontWeight:700,
+                  boxShadow:'0 0 16px #10B98144',animation:'pulseGlow 2.5s ease-in-out infinite',animationTimingFunction:'ease'}}>
+                  + List Service
+                </button>
+                {user.role==='admin'&&(
+                  <button onClick={()=>setShowAdmin(true)} style={{background:'#F59E0B18',border:'1px solid #F59E0B33',
+                    borderRadius:10,padding:'7px 11px',color:'#F59E0B',cursor:'pointer',fontSize:11,fontWeight:600}}>⚙️</button>
+                )}
+                <div style={{display:'flex',alignItems:'center',gap:6,background:'#0F1328',borderRadius:10,
+                  padding:'6px 12px',cursor:'pointer',border:'1px solid #1A2040',transition:'all 0.2s'}}
+                  onClick={logout}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor='#EF444433'}
+                  onMouseLeave={e=>e.currentTarget.style.borderColor='#1A2040'}>
+                  <span style={{fontSize:14}}>{user.avatar}</span>
+                  <span style={{color:'#6677AA',fontSize:11,fontWeight:600}}>{user.name.split(' ')[0]}</span>
+                  <span style={{color:'#1A2040',fontSize:10}}>✕</span>
+                </div>
+              </div>
+            ):(
+              <div style={{display:'flex',gap:6}}>
+                <button onClick={()=>{setAuthMode('login');setShowAuth(true);}} style={{background:'#0F1328',
+                  border:'1px solid #1A2040',borderRadius:10,padding:'7px 13px',color:'#4A5580',cursor:'pointer',fontSize:11,fontWeight:600}}>
+                  Sign In
+                </button>
+                <button onClick={()=>{setAuthMode('register');setShowAuth(true);}} style={{
+                  background:'linear-gradient(135deg,#5B3FFF,#4030CC)',border:'none',borderRadius:10,
+                  padding:'7px 14px',color:'#fff',cursor:'pointer',fontSize:11,fontWeight:700,
+                  boxShadow:'0 0 16px #5B3FFF44',animation:'pulseGlow 3s ease-in-out infinite'}}>
+                  Sign Up Free
+                </button>
+              </div>
+            )}
+          </nav>
+        </div>
+      </header>
+
+      {/* HERO SECTION */}
+      {page==='home'&&(
+        <section style={{background:'linear-gradient(180deg,#080B1C 0%,#02040A 100%)',
+          padding:'52px 20px 36px',textAlign:'center',borderBottom:'1px solid #0F1328',
+          position:'relative',overflow:'hidden'}}>
+          {/* floating bg icons */}
+          {[['🚗','8%','15%',3],['🍽️','90%','20%',3.5],['🏠','5%','70%',4],['🩺','92%','65%',3.2],['📚','15%','85%',3.8],['🔧','80%','80%',4.2]].map(([ic,l,t,d])=>(
+            <div key={ic} style={{position:'absolute',left:l,top:t,fontSize:28,opacity:0.08,
+              animation:`floatUp ${d}s ease-in-out infinite`,pointerEvents:'none'}}>{ic}</div>
+          ))}
+          <div style={{maxWidth:720,margin:'0 auto',position:'relative',zIndex:1}}>
+            <div style={{display:'inline-block',background:'linear-gradient(135deg,#5B3FFF22,#38BDF822)',
+              border:'1px solid #5B3FFF44',borderRadius:20,padding:'5px 16px',fontSize:10.5,
+              color:'#A78BFA',marginBottom:18,fontWeight:700,letterSpacing:1.5,
+              animation:'fadeUp 0.5s ease'}}>
+              ✦ ABBOTTABAD'S MOST POWERFUL LOCAL APP
+            </div>
+            <h1 className='hero-title' style={{display:'block',marginBottom:14,animation:'fadeUp 0.5s 0.1s ease both'}}>
+              FIND IT ALL.<br/>BOOK IT NOW.
+            </h1>
+            <p style={{color:'#4A5580',fontSize:15,marginBottom:28,lineHeight:1.6,fontWeight:500,animation:'fadeUp 0.5s 0.2s ease both'}}>
+              Rides · Food · Houses · Doctors · Technicians · Tutors · Shops<br/>
+              <span style={{color:'#2A3560',fontSize:13}}>All in one place. Verified. Secure. 100% Free.</span>
+            </p>
+            {/* SEARCH BAR */}
+            <div style={{display:'flex',gap:8,maxWidth:580,margin:'0 auto 22px',animation:'fadeUp 0.5s 0.3s ease both'}}>
+              <div style={{flex:1,position:'relative'}}>
+                <span style={{position:'absolute',left:13,top:'50%',transform:'translateY(-50%)',fontSize:15,pointerEvents:'none',opacity:0.5}}>🔍</span>
+                <input value={q} onChange={e=>setQ(e.target.value)}
+                  placeholder='Search services, doctors, food, rides...'
+                  style={{width:'100%',background:'#0A0D1E',border:'1px solid #1A2040',borderRadius:14,
+                    padding:'13px 14px 13px 38px',color:'#ECF0FF',fontSize:13,transition:'border-color 0.2s',
+                    boxShadow:'0 4px 24px #00000088'}}
+                  onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}/>
+              </div>
+              <select value={cityF} onChange={e=>setCityF(e.target.value)}
+                style={{background:'#0A0D1E',border:'1px solid #1A2040',borderRadius:14,padding:'13px 12px',
+                  color:'#4A5580',fontSize:12,cursor:'pointer',minWidth:130,boxShadow:'0 4px 24px #00000088'}}
+                onFocus={e=>e.target.style.borderColor='#5B3FFF'} onBlur={e=>e.target.style.borderColor='#1A2040'}>
+                {allCities.map(c=><option key={c}>{c}</option>)}
+              </select>
+            </div>
+            {/* STATS */}
+            <div style={{display:'flex',gap:24,justifyContent:'center',flexWrap:'wrap',animation:'fadeUp 0.5s 0.4s ease both'}}>
+              {[[services.length+'+','Live Services'],['7','Cities Covered'],['100%','Free to Use'],['🛡️','Anti-Scam']].map(([n,l])=>(
+                <div key={l} style={{textAlign:'center'}}>
+                  <div style={{color:'#A78BFA',fontSize:18,fontWeight:800,fontFamily:"'Bebas Neue',sans-serif",letterSpacing:1}}>{n}</div>
+                  <div style={{color:'#1A2040',fontSize:10,fontWeight:600,letterSpacing:0.5}}>{l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CATEGORY PILLS */}
+      <div style={{background:'#04060F',borderBottom:'1px solid #0F1328',padding:'0 20px',
+        position:'sticky',top:60,zIndex:150,backdropFilter:'blur(10px)'}}>
+        <div style={{maxWidth:1240,margin:'0 auto',display:'flex',gap:6,overflowX:'auto',padding:'10px 0',
+          scrollbarWidth:'none'}}>
+          <button onClick={()=>setActiveCat(null)} style={{
+            background:!activeCat?'linear-gradient(135deg,#5B3FFF22,#5B3FFF0A)':'#07091A',
+            border:`1.5px solid ${!activeCat?'#5B3FFF':'#1A2040'}`,
+            borderRadius:12,padding:'8px 16px',color:!activeCat?'#A78BFA':'#2A3560',
+            cursor:'pointer',fontSize:11.5,fontWeight:700,whiteSpace:'nowrap',transition:'all 0.2s',flexShrink:0,
+            boxShadow:!activeCat?'0 0 16px #5B3FFF22':'none'}}>
+            🌟 All ({services.length})
+          </button>
+          {CATS.map((c,i)=>{
+            const cnt=services.filter(s=>s.cat===c.id).length;
+            const active=activeCat===c.id;
+            return(
+              <button key={c.id} onClick={()=>setActiveCat(active?null:c.id)} style={{
+                background:active?`linear-gradient(135deg,${c.color}22,${c.color}0A)`:'#07091A',
+                border:`1.5px solid ${active?c.color:c.color+'18'}`,
+                borderRadius:12,padding:'8px 16px',color:active?c.color:'#2A3560',
+                cursor:'pointer',fontSize:11.5,fontWeight:700,whiteSpace:'nowrap',
+                transition:'all 0.25s',flexShrink:0,
+                transform:active?'translateY(-2px)':'none',
+                boxShadow:active?`0 4px 16px ${c.color}33`:'none',
+                animation:`fadeUp 0.4s ${i*0.04}s ease both`}}>
+                <span style={{display:'inline-block',animation:active?'floatUp 2.5s ease-in-out infinite':'none',marginRight:5}}>{c.icon}</span>
+                {c.label} ({cnt})
+              </button>
+            );
+          })}
+          <button onClick={()=>setShowMap(!showMap)} style={{
+            background:showMap?'#38BDF822':'#07091A',border:`1.5px solid ${showMap?'#38BDF8':'#1A2040'}`,
+            borderRadius:12,padding:'8px 16px',color:showMap?'#38BDF8':'#2A3560',
+            cursor:'pointer',fontSize:11.5,fontWeight:700,whiteSpace:'nowrap',transition:'all 0.2s',flexShrink:0}}>
+            {showMap?'📋 List':'🗺️ Map'}
+          </button>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT */}
+      <main style={{maxWidth:1240,margin:'0 auto',padding:'22px 20px',position:'relative',zIndex:1}}>
+        {page==='reviews'?(
+          <div style={{animation:'fadeUp 0.4s ease'}}>
+            <h2 style={{color:'#ECF0FF',fontFamily:"'Bebas Neue',sans-serif",fontSize:36,letterSpacing:1,marginBottom:4}}>COMMUNITY REVIEWS</h2>
+            <p style={{color:'#2A3560',fontSize:13,marginBottom:24}}>Real experiences from real people across Pakistan</p>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:16}}>
+              {(DB.get('reviews')||[]).map((r,i)=>(
+                <div key={r.id} style={{background:'#07091A',border:'1px solid #1A2040',borderRadius:18,padding:20,
+                  animation:`cardSlide 0.4s ease ${i*0.07}s both`}}>
+                  <div style={{display:'flex',gap:10,marginBottom:12}}>
+                    <span style={{fontSize:28,animation:'floatUp 3s ease-in-out infinite',display:'inline-block'}}>{r.avatar}</span>
+                    <div>
+                      <p style={{color:'#ECF0FF',margin:0,fontSize:13,fontWeight:700}}>{r.user}</p>
+                      <p style={{color:'#2A3560',margin:'2px 0 0',fontSize:10}}>Used: {r.service}</p>
+                    </div>
+                  </div>
+                  <div style={{marginBottom:8}}>
+                    {[1,2,3,4,5].map(i=><span key={i} style={{color:i<=r.rating?'#F59E0B':'#1A2040',fontSize:14}}>★</span>)}
+                  </div>
+                  <p style={{color:'#4A5580',fontSize:12,lineHeight:1.6,margin:'0 0 10px',fontStyle:'italic'}}>"{r.text}"</p>
+                  <p style={{color:'#1A2040',fontSize:10,margin:0}}>📅 {r.date}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ):showMap?(
+          <div style={{display:'grid',gridTemplateColumns:'1fr 330px',gap:20,alignItems:'start'}}>
+            <MapView services={services} activeCat={activeCat} selectedId={selPin?.id} onPinClick={s=>{setSelPin(s);setActiveCat(s.cat);}}/>
+            <div>
+              {selPin?(
+                <div style={{background:'#07091A',border:`1px solid ${CMAP[selPin.cat]||'#5B3FFF'}44`,borderRadius:20,
+                  padding:18,marginBottom:14,animation:'zoomIn 0.3s ease'}}>
+                  <h4 style={{color:'#ECF0FF',margin:'0 0 6px',fontSize:15,fontWeight:700}}>{selPin.icon} {selPin.name}</h4>
+                  <p style={{color:'#2A3560',fontSize:11,margin:'0 0 8px'}}>📍 {selPin.city} · {selPin.address}</p>
+                  <div style={{display:'flex',gap:6,marginBottom:8}}>
+                    <span style={{color:'#4A5580',fontSize:10}}>🌐 {selPin.lat}°N</span>
+                    <span style={{color:'#4A5580',fontSize:10}}>📍 {selPin.lng}°E</span>
+                  </div>
+                  <p style={{color:'#4A5580',fontSize:11,lineHeight:1.5,margin:'0 0 10px'}}>{selPin.desc}</p>
+                  <div style={{color:CMAP[selPin.cat]||'#5B3FFF',fontWeight:800,fontSize:15,marginBottom:10,
+                    textShadow:`0 0 20px ${CMAP[selPin.cat]||'#5B3FFF'}55`}}>{selPin.price}</div>
+                  <button onClick={()=>setBooking(selPin)} style={{width:'100%',
+                    background:`linear-gradient(135deg,${CMAP[selPin.cat]||'#5B3FFF'},${CMAP[selPin.cat]||'#5B3FFF'}AA)`,
+                    border:'none',borderRadius:10,padding:'10px',color:'#fff',fontWeight:700,cursor:'pointer',fontSize:13}}>
+                    Book Now →
+                  </button>
+                </div>
+              ):(
+                <div style={{background:'#07091A',borderRadius:20,padding:'24px 18px',marginBottom:14,
+                  textAlign:'center',border:'1px solid #1A2040'}}>
+                  <div style={{fontSize:36,animation:'floatUp 2.5s ease-in-out infinite',display:'inline-block'}}>📍</div>
+                  <p style={{color:'#2A3560',fontSize:12,marginTop:10,lineHeight:1.6}}>
+                    Tap any colored pin on the map to see service details
+                  </p>
+                </div>
+              )}
+              <h3 style={{color:'#ECF0FF',fontSize:13,margin:'0 0 10px',fontWeight:700,fontFamily:"'Bebas Neue',sans-serif",letterSpacing:1}}>COVERED CITIES</h3>
+              {COVERED.map(city=>(
+                <div key={city} style={{background:'#07091A',border:'1px solid #1A2040',borderRadius:10,
+                  padding:'8px 14px',marginBottom:6,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <span style={{color:'#ECF0FF',fontSize:12,fontWeight:500}}>📍 {city}</span>
+                  <span style={{background:'#5B3FFF18',color:'#A78BFA',border:'1px solid #5B3FFF33',
+                    borderRadius:20,padding:'2px 9px',fontSize:9,fontWeight:700,
+                    boxShadow:'0 0 8px #5B3FFF33'}}>ACTIVE</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ):(
+          <div key={`${activeCat}-${q}-${cityF}-${tick}`} style={{animation:'fadeUp 0.35s ease'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+              <div>
+                <p style={{color:'#2A3560',fontSize:13,margin:0,fontWeight:500}}>
+                  Showing <strong style={{color:'#ECF0FF'}}>{filtered.length}</strong> results
+                  {activeCat&&<> in <strong style={{color:CMAP[activeCat]}}>{CATS.find(c=>c.id===activeCat)?.label}</strong></>}
+                  {cityF!=='All'&&<> · <strong style={{color:'#A78BFA'}}>{cityF}</strong></>}
+                </p>
+              </div>
+              {!user&&(
+                <button onClick={()=>{setAuthMode('register');setShowAuth(true);}} style={{
+                  background:'#5B3FFF18',border:'1px solid #5B3FFF33',borderRadius:8,
+                  padding:'6px 12px',color:'#A78BFA',cursor:'pointer',fontSize:11,fontWeight:600}}>
+                  + List Your Service Free
+                </button>
+              )}
+            </div>
+            {filtered.length===0?(
+              <div style={{textAlign:'center',padding:'70px 0'}}>
+                <div style={{fontSize:56,animation:'floatUp 2.5s ease-in-out infinite',display:'inline-block'}}>🔍</div>
+                <p style={{color:'#2A3560',fontSize:16,margin:'16px 0 6px',fontWeight:700}}>No results found</p>
+                <p style={{color:'#1A2040',fontSize:12}}>Try a different city, category, or search term</p>
+              </div>
+            ):(
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(290px,1fr))',gap:16}}>
+                {filtered.map((s,i)=>(
+                  <ServiceCard key={s.id} s={s} delay={i}
+                    onBook={setBooking}
+                    sel={selPin?.id===s.id}
+                    onSelect={s=>setSelPin(s)}/>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* WHY US SECTION */}
+      {page==='home'&&!activeCat&&!q&&(
+        <section style={{background:'#06091A',borderTop:'1px solid #0F1328',padding:'44px 20px',marginTop:20}}>
+          <div style={{maxWidth:1240,margin:'0 auto',textAlign:'center'}}>
+            <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:40,letterSpacing:2,color:'#ECF0FF',marginBottom:6}}>
+              WHY SHAHBAAZ?
+            </h2>
+            <p style={{color:'#2A3560',fontSize:13,marginBottom:32}}>Everything appabbottabad.com has — and 10x more</p>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:16}}>
+              {[
+                ['🛡️','#5B3FFF','Anti-Scam Codes','Every booking gets a unique verification code. No more imposters.'],
+                ['📍','#38BDF8','Precise Map Pins','Every service is pinned to its exact GPS location on the map.'],
+                ['🔐','#10B981','Real Login System','Actual accounts, not just phone lookup. Secure & persistent.'],
+                ['💬','#F59E0B','In-App WhatsApp','Connect directly with providers via WhatsApp after booking.'],
+                ['🆓','#EC4899','100% Free Forever','No PKR 200/month. No ads. No hidden fees. Ever.'],
+                ['⭐','#A78BFA','Verified Providers','Admin-verified badge system for trusted service providers.'],
+              ].map(([ic,c,title,desc])=>(
+                <div key={title} style={{background:'#07091A',border:`1px solid ${c}22`,borderRadius:18,padding:20,
+                  transition:'all 0.3s',cursor:'default'}}
+                  onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.borderColor=c+'55';e.currentTarget.style.boxShadow=`0 12px 30px ${c}22`}}
+                  onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=c+'22';e.currentTarget.style.boxShadow='none'}}>
+                  <div style={{fontSize:32,marginBottom:12,animation:'floatUp 3s ease-in-out infinite',display:'inline-block',
+                    filter:`drop-shadow(0 0 10px ${c}88)`}}>{ic}</div>
+                  <h4 style={{color:'#ECF0FF',fontSize:13,fontWeight:700,margin:'0 0 6px'}}>{title}</h4>
+                  <p style={{color:'#2A3560',fontSize:11,lineHeight:1.6,margin:0}}>{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* FOOTER */}
+      <footer style={{borderTop:'1px solid #0F1328',padding:'28px 20px 20px',marginTop:0}}>
+        <div style={{maxWidth:1240,margin:'0 auto',textAlign:'center'}}>
+          <div style={{display:'flex',gap:12,justifyContent:'center',marginBottom:14,flexWrap:'wrap'}}>
+            {CATS.map((c,i)=>(
+              <span key={c.id} style={{fontSize:20,display:'inline-block',cursor:'pointer',
+                animation:`floatUp ${2.2+i*0.25}s ease-in-out ${i*0.15}s infinite`,
+                filter:`drop-shadow(0 0 8px ${c.color}88)`,transition:'transform 0.2s'}}
+                onClick={()=>setActiveCat(c.id)}
+                onMouseEnter={e=>e.currentTarget.style.transform='scale(1.3)'}
+                onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>{c.icon}</span>
+            ))}
+          </div>
+          <p style={{color:'#1A2040',fontSize:11,margin:'0 0 5px',fontWeight:600}}>
+            🦅 <strong style={{color:'#A78BFA',fontFamily:"'Bebas Neue',sans-serif",letterSpacing:1}}>SHAHBAAZ</strong>
+            {' '}— Pakistan's Premium Service Super App · Abbottabad & Beyond
+          </p>
+          <p style={{color:'#0F1328',fontSize:10,margin:'0 0 16px'}}>Admin demo code: SHAHBAAZ2024 · Free forever</p>
+          <div style={{borderTop:'1px solid #0F1328',paddingTop:16}}>
+            <p style={{margin:0,color:'#2A3560',fontSize:12}}>
+              Designed & Developed by{' '}
+              <strong style={{color:'#A78BFA',fontFamily:"'Bebas Neue',sans-serif",fontSize:16,letterSpacing:1,
+                textShadow:'0 0 16px #5B3FFF88'}}>ASHHAD</strong>
+            </p>
+            <p style={{margin:'6px 0 0',fontSize:12}}>
+              <span style={{color:'#1A2040'}}>📞 </span>
+              <a href='tel:03108762949' style={{color:'#38BDF8',textDecoration:'none',fontWeight:700,
+                textShadow:'0 0 12px #38BDF866',letterSpacing:0.5}}>0310-8762949</a>
+            </p>
+          </div>
+        </div>
+      </footer>
+
+      {/* MODALS */}
+      {showAuth&&<AuthModal initMode={authMode} onSuccess={u=>{setUser(u);setShowAuth(false);}} onClose={()=>setShowAuth(false)}/>}
+      {showAdd&&<AddServiceModal user={user} onDone={()=>refresh()} onClose={()=>{setShowAdd(false);refresh();}}/>}
+      {booking&&<BookingModal s={booking} user={user} onClose={()=>setBooking(null)}/>}
+      {showAdmin&&<AdminPanel onUpdate={refresh} onClose={()=>setShowAdmin(false)} user={user}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
